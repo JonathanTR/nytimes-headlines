@@ -18,18 +18,21 @@ function Article (props) {
   this.props = props;
   this.template =
     "<div class='article' data-id='${id}'>" +
-      (props.imageURL ?
-        "<img class='article--thumbnail' src='http://nytimes.com/${imageURL}' />"
-      : "<div class='article--placeholder'></div>") +
-      "<a class='article--headline' href='${url}'>${headline}</a>" +
+      "<a href='${url}' target='_blank'>" +
+        (props.thumbURL ?
+          "<img class='article__thumbnail' src='http://nytimes.com/${thumbURL}' />"
+        : "<div class='article__thumbnail'></div>") +
+        "<div class='article__headline'>${headline}</div>" +
+        "<div class='article__headline'>${headline}</div>" +
+      "</a>" +
     "</div>"
 }
 Article.prototype = new Component()
 
 var NYTD = {
   endpoint: 'http://np-ec2-nytimes-com.s3.amazonaws.com/dev/test/nyregion.js',
-  getRoot: function () {
-    return document.getElementById('root');
+  articleListEl: function () {
+    return document.getElementById('article-list');
   },
 
   fetchHeadlines: function () {
@@ -46,7 +49,7 @@ var NYTD = {
       var thumbNails = imageTypes.filter(function(image){
         return image.type == 'thumbStandard';
       });
-      return thumbNails[0];
+      return thumbNails[0] && thumbNails[0].content;
     }
     return null;
   },
@@ -58,12 +61,11 @@ var NYTD = {
       columns[column.name] = [];
       column.collections.forEach(function (collection) {
         collection.assets.forEach(function (asset) {
-          if(asset.type == 'TwoColumnCustom'){debugger}
           columns[column.name].push({
             headline: asset.headline,
             id: asset.id,
             summary: asset.summary,
-            thumbNail: _this.findThumbnail(asset),
+            thumbURL: _this.findThumbnail(asset),
             type: asset.type,
             url: asset.url,
           });
@@ -75,17 +77,10 @@ var NYTD = {
 
   render_section_front: function (response) {
     var columns = this.filterArticleData(response.page.content);
-    var root = this.getRoot();
-    columns.aColumn.forEach(function(articleObj){
-      var article = new Article({
-        headline: articleObj.headline,
-        id: articleObj.id,
-        summary: articleObj.summary,
-        imageURL: articleObj.thumbNail && articleObj.thumbNail.content,
-        type: articleObj.type,
-        url: articleObj.url,
-      });
-      root.appendChild(article.render());
+    var articleList = this.articleListEl();
+    columns.aColumn.forEach(function(payload){
+      var article = new Article(payload);
+      articleList.appendChild(article.render());
     })
   }
 }

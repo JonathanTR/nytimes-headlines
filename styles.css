@@ -1,19 +1,55 @@
 body {
   font-size: 16px;
 }
-h1 { font-size: 2em; }
-h2 { font-size: 1.8em; }
-h3 { font-size: 1.6em; }
-h4 { font-size: 1.4em; }
-h5 { font-size: 1.2em; }
-h6 { font-size: 1em; }
 
-pre {
-  font-family: monospace;
-  font-size: 0.8em;
-  line-height: 1.4em;
+#article-list {
+  margin: 2em auto 0;
+  width: 40em;
+}
+
+.article {
+  background: white;
+  border-bottom: 1px solid #DFDFDF;
+  height: 3em;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.article:hover {
+  cursor: pointer;
+}
+
+.article__headline,
+.article__info,
+.article__placeholder,
+.article__thumbnail {
+  display: inline-block;
+}
+
+.article__info {
+  color: #0F0F0F;
+  font-family: Helvetica, Sans-Serif;
+  line-height: 3em;
+  padding-left: 1em;
+  text-decoration: none;
+  vertical-align: top;
+}
+
+.article__info:hover {
+  transform: translateY(-50%);
+  transition: transform 250ms;
+}
+
+.article__thumbnail {
+  height: 3em;
+  width: 3em;
+}
+
+.masthead {
+  display: block;
+  text-align: center;
 }
 
 .name-plate {
-  font-family: 'Bevan', cursive;
+  width: 16em;
 }
