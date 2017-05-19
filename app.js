@@ -1,3 +1,31 @@
+function Component (props) {
+  this.props = props;
+  this.template = '';
+}
+
+Component.prototype.render = function () {
+  var _this = this;
+  var interpolator = /\${[^}]+}/g;
+  var div = document.createElement('div');
+  div.innerHTML = _this.template.replace(interpolator, function(match){
+    key = match.substr(2, match.length - 3)
+    return _this.props[key]
+  })
+  return div
+}
+
+function Article (props) {
+  this.props = props;
+  this.template =
+    "<div class='article' data-id='${id}'>" +
+      (props.imageURL ?
+        "<img class='article--thumbnail' src='http://nytimes.com/${imageURL}' />"
+      : "<div class='article--placeholder'></div>") +
+      "<a class='article--headline' href='${url}'>${headline}</a>" +
+    "</div>"
+}
+Article.prototype = new Component()
+
 var NYTD = {
   endpoint: 'http://np-ec2-nytimes-com.s3.amazonaws.com/dev/test/nyregion.js',
   getRoot: function () {
@@ -27,15 +55,18 @@ var NYTD = {
     var columns = {};
     var _this = this;
     pageContent.forEach(function (column) {
-      columns[column.name] = column.collections.map(function (collection) {
-        return collection.assets.map(function (asset) {
-          return {
+      columns[column.name] = [];
+      column.collections.forEach(function (collection) {
+        collection.assets.forEach(function (asset) {
+          if(asset.type == 'TwoColumnCustom'){debugger}
+          columns[column.name].push({
             headline: asset.headline,
+            id: asset.id,
             summary: asset.summary,
             thumbNail: _this.findThumbnail(asset),
             type: asset.type,
             url: asset.url,
-          };
+          });
         });
       });
     });
@@ -43,10 +74,19 @@ var NYTD = {
   },
 
   render_section_front: function (response) {
-    var filteredArticleData = this.filterArticleData(response.page.content);
-    var headlines = document.createElement('pre');
-    headlines.innerText = JSON.stringify(filteredArticleData, null, 2);
-    document.body.appendChild(headlines);
+    var columns = this.filterArticleData(response.page.content);
+    var root = this.getRoot();
+    columns.aColumn.forEach(function(articleObj){
+      var article = new Article({
+        headline: articleObj.headline,
+        id: articleObj.id,
+        summary: articleObj.summary,
+        imageURL: articleObj.thumbNail && articleObj.thumbNail.content,
+        type: articleObj.type,
+        url: articleObj.url,
+      });
+      root.appendChild(article.render());
+    })
   }
 }
 
