@@ -1,33 +1,30 @@
-function Component (props) {
-  this.props = props;
-  this.template = '';
-}
 
-Component.prototype.render = function () {
-  var _this = this;
+function render (templateFunc, props) {
   var interpolator = /\${[^}]+}/g;
   var div = document.createElement('div');
-  div.innerHTML = _this.template.replace(interpolator, function(match){
+  var template = templateFunc(props);
+  div.innerHTML = template.replace(interpolator, function(match){
     key = match.substr(2, match.length - 3)
-    return _this.props[key]
+    return props[key]
   })
   return div
 }
 
-function Article (props) {
-  this.props = props;
-  this.template =
+function articleTemplate (props) {
+  return(
     "<div class='article' data-id='${id}'>" +
       "<a href='${url}' target='_blank'>" +
         (props.thumbURL ?
-          "<img class='article__thumbnail' src='http://nytimes.com/${thumbURL}' />"
-        : "<div class='article__thumbnail'></div>") +
+          "<img class='article__thumbnail' src='${thumbURL}' />"
+        :
+          "<div class='article__thumbnail'></div>"
+        ) +
         "<div class='article__headline'>${headline}</div>" +
-        "<div class='article__headline'>${headline}</div>" +
+        "<div class='article__headline--martian'>${martianHeadline}</div>" +
       "</a>" +
     "</div>"
+  )
 }
-Article.prototype = new Component()
 
 var NYTD = {
   endpoint: 'http://np-ec2-nytimes-com.s3.amazonaws.com/dev/test/nyregion.js',
@@ -49,9 +46,17 @@ var NYTD = {
       var thumbNails = imageTypes.filter(function(image){
         return image.type == 'thumbStandard';
       });
-      return thumbNails[0] && thumbNails[0].content;
+      return thumbNails[0] && 'http://nytimes.com/' + thumbNails[0].content;
     }
     return null;
+  },
+
+  translateMartian: function (title) {
+    if (!title) return
+    var Capitalized = /^[A-Z]/
+    return title.replace(/\w{3,}/g, function (match) {
+      return Capitalized.test(match) ? 'Boinga' : 'boinga'
+    })
   },
 
   filterArticleData: function (pageContent) {
@@ -64,6 +69,7 @@ var NYTD = {
           columns[column.name].push({
             headline: asset.headline,
             id: asset.id,
+            martianHeadline: _this.translateMartian(asset.headline),
             summary: asset.summary,
             thumbURL: _this.findThumbnail(asset),
             type: asset.type,
@@ -79,12 +85,21 @@ var NYTD = {
     var columns = this.filterArticleData(response.page.content);
     var articleList = this.articleListEl();
     columns.aColumn.forEach(function(payload){
-      var article = new Article(payload);
-      articleList.appendChild(article.render());
+      var article = render(articleTemplate, payload)
+      articleList.appendChild(article);
     })
   }
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+  var languageForm = document.getElementById('language-form');
+  languageForm.addEventListener('change', function(e) {
+    var className = document.body.className;
+    if (/martian/.test(className)) {
+      document.body.className = className.replace(/martian/g, '');
+    } else {
+      document.body.className += ' martian';
+    };
+  });
   NYTD.fetchHeadlines();
 });
