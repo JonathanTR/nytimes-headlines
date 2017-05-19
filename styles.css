@@ -1,55 +1,56 @@
-body {
-  font-size: 16px;
-}
+body { font-size: 16px }
+label { cursor: pointer }
+input[type=radio] { vertical-align: middle }
 
+.masthead { text-align: center }
+.name-plate { width: 16em }
+
+#language-form { text-align: center }
+#language-form,
 #article-list {
-  margin: 2em auto 0;
-  width: 40em;
+  margin: 1em auto;
+  width: 60%;
 }
 
 .article {
   background: white;
   border-bottom: 1px solid #DFDFDF;
-  height: 3em;
+  height: 4em;
+  line-height: 1.4em;
   overflow: hidden;
-  white-space: nowrap;
+  position: relative;
 }
+.article:hover { cursor: pointer }
 
-.article:hover {
-  cursor: pointer;
+.article__thumbnail {
+  display: inline-block;
+  height: 4em;
+  width: 4em;
 }
 
 .article__headline,
-.article__info,
-.article__placeholder,
-.article__thumbnail {
-  display: inline-block;
-}
-
-.article__info {
+.article__headline--martian {
   color: #0F0F0F;
+  display: inline-block;
   font-family: Helvetica, Sans-Serif;
-  line-height: 3em;
-  padding-left: 1em;
+  padding: 0 1em;
+  position: absolute;
   text-decoration: none;
-  vertical-align: top;
-}
-
-.article__info:hover {
+  top: 50%;
   transform: translateY(-50%);
-  transition: transform 250ms;
 }
 
-.article__thumbnail {
-  height: 3em;
-  width: 3em;
+/* Toggle language visibility */
+.article__headline--martian { display: none }
+.martian .article__headline { display: none }
+.martian .article__headline--martian { display: inline-block }
+
+@media (max-width: 768px) {
+  body { font-size: 12px }
+  #article-list { width: 80% }
 }
 
-.masthead {
-  display: block;
-  text-align: center;
-}
-
-.name-plate {
-  width: 16em;
+@media (max-width: 320px) {
+  body { font-size: 8px }
+  #article-list { width: 100% }
 }
