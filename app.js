@@ -60,33 +60,34 @@ var NYTD = {
   },
 
   filterArticleData: function (pageContent) {
-    var columns = {};
     var _this = this;
+    var ACCEPTED = ['Article', 'BlogPost', 'ImageSlideShow', 'InteractiveGraphics', 'Video']
+    var articles = [];
     pageContent.forEach(function (column) {
-      columns[column.name] = [];
       column.collections.forEach(function (collection) {
-        collection.assets.forEach(function (asset) {
-          columns[column.name].push({
-            headline: asset.headline,
-            id: asset.id,
-            martianHeadline: _this.translateMartian(asset.headline),
-            summary: asset.summary,
-            thumbURL: _this.findThumbnail(asset),
-            type: asset.type,
-            url: asset.url,
+        collection.assets.forEach(function (article) {
+          if (ACCEPTED.indexOf(article.type) == -1) return
+          articles.push({
+            headline: article.headline,
+            id: article.id,
+            martianHeadline: _this.translateMartian(article.headline),
+            summary: article.summary,
+            thumbURL: _this.findThumbnail(article),
+            type: article.type,
+            url: article.url,
           });
         });
       });
     });
-    return columns;
+    return articles;
   },
 
   render_section_front: function (response) {
-    var columns = this.filterArticleData(response.page.content);
-    var articleList = this.articleListEl();
-    columns.aColumn.forEach(function(payload){
+    var articleList = this.filterArticleData(response.page.content);
+    var articleListEl = this.articleListEl();
+    articleList.forEach(function(payload){
       var article = render(articleTemplate, payload)
-      articleList.appendChild(article);
+      articleListEl.appendChild(article);
     })
   }
 }
